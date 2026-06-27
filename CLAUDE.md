@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Product
 
-**Bukku** — LINE LIFF backoffice SaaS สำหรับร้านค้าขนาดเล็ก  
+**Khaai** (ขาย) — LINE LIFF backoffice SaaS สำหรับร้านค้าขนาดเล็ก  
 Multi-tenant: แต่ละร้านมี slug เป็นของตัวเอง → `/shop/[shopId]`
 
 ## Commands
