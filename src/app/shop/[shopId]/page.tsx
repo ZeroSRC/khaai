@@ -66,10 +66,14 @@ export default function DashboardPage() {
               {lineDisplayName?.[0] ?? '?'}
             </div>
           )}
-          <div>
+          <div className="flex-1">
             <p className="text-white/80 text-xs">สวัสดี,</p>
             <p className="text-white font-semibold text-sm">{lineDisplayName}</p>
           </div>
+          <Link href={`${base}/settings/members`}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white text-lg">
+            ⚙️
+          </Link>
         </div>
         <h1 className="text-white text-xl font-bold">{shop.name}</h1>
         <p className="text-white/70 text-xs mt-0.5">{dayjs().format('dddd D MMMM')}</p>
