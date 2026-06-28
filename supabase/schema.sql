@@ -350,61 +350,95 @@ alter table shipments         enable row level security;
 alter table expenses          enable row level security;
 alter table audit_logs        enable row level security;
 
+-- Helper: read LINE userId from request header or pg setting
+create or replace function current_line_uid()
+returns text language sql security definer as $$
+  select coalesce(
+    nullif(current_setting('app.line_uid', true), ''),
+    (current_setting('request.headers', true)::json->>'x-line-uid')
+  );
+$$;
+
 -- Helper: check if current user is member of shop
 create or replace function is_shop_member(p_shop_id uuid)
 returns boolean language sql security definer as $$
   select exists (
     select 1 from shop_members
     where shop_id = p_shop_id
-      and line_uid = current_setting('app.line_uid', true)
+      and line_uid = current_line_uid()
   );
 $$;
 
--- RLS policies (member of shop can read/write their shop data)
-create policy "shop members only" on shops
-  using (is_shop_member(id));
+-- RLS policies
+-- shops: members can read/write; anyone can INSERT (to register)
+create policy "shop members read/write" on shops
+  using (is_shop_member(id))
+  with check (is_shop_member(id));
 
-create policy "shop members only" on shop_members
-  using (is_shop_member(shop_id));
+create policy "allow register shop" on shops
+  for insert with check (owner_line_uid = current_line_uid());
 
+-- shop_members: members can read; insert allowed (join via link or owner add)
+create policy "shop members read/write" on shop_members
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
+
+create policy "allow join shop" on shop_members
+  for insert with check (line_uid = current_line_uid());
+
+-- all other tables: members only (read + write)
 create policy "shop members only" on bank_accounts
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on tags
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on products
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on product_tag_map
-  using (is_shop_member((select shop_id from products where id = product_id)));
+  using (is_shop_member((select shop_id from products where id = product_id)))
+  with check (is_shop_member((select shop_id from products where id = product_id)));
 
 create policy "shop members only" on customers
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on customer_addresses
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on sales
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on sale_items
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on serial_numbers
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on purchases
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on purchase_items
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on shipments
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on expenses
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
 
 create policy "shop members only" on audit_logs
-  using (is_shop_member(shop_id));
+  using (is_shop_member(shop_id))
+  with check (is_shop_member(shop_id));
