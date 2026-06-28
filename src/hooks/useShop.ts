@@ -47,6 +47,7 @@ export function useShopInit(slug: string) {
           return
         }
         setMember(member as ShopMember)
+        localStorage.setItem('khaai_last_shop', slug)
       } catch (e) {
         setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
       } finally {

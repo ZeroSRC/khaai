@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const base = `/shop/${shopId}`
 
   const handleSwitchShop = () => {
+    localStorage.removeItem('khaai_last_shop')
     clear()
     router.push('/')
   }

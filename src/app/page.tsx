@@ -7,17 +7,33 @@ import { initLiff } from '@/lib/liff'
 export default function Home() {
   const router = useRouter()
   const [slug, setSlug] = useState('')
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    // Process LINE auth tokens when LINE redirects back here after login
-    // LINE redirects to root (/) with ?liff.state=... — must call init here to save tokens
-    initLiff().catch(() => {})
-  }, [])
+    // Process LINE auth tokens when LINE redirects back here after login,
+    // then auto-redirect to last visited shop if saved
+    initLiff()
+      .then(() => {
+        const saved = localStorage.getItem('khaai_last_shop')
+        if (saved) router.replace(`/shop/${saved}`)
+        else setReady(true)
+      })
+      .catch(() => setReady(true))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGo = () => {
     const clean = slug.trim().toLowerCase()
     if (!clean) return
     router.push(`/shop/${clean}`)
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-3">
+        <div className="w-10 h-10 rounded-xl bg-[#06C755] animate-pulse" />
+        <p className="text-sm text-gray-400">กำลังโหลด...</p>
+      </div>
+    )
   }
 
   return (
